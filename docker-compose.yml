@@ -25,7 +25,7 @@ services:
       - "traefik.http.routers.uckermark-social.entrypoints=websecure"
       - "traefik.http.routers.uckermark-social.tls.certresolver=letsencrypt"
       - "traefik.http.routers.uckermark-social.middlewares=blogauth"
-      - "traefik.http.middlewares.blogauth.basicauth.users=ananas:$$2y$$05$$noJRtU7JseMMmht7h3cgieWUA7KeNa3FWDhDYXK/cA/S1PKs5Cj3G"
+      - "traefik.http.middlewares.blogauth.basicauth.usersfile=/rules/traefik-users.file"
 
   db:
     image: mysql:5.7
