@@ -1,0 +1,49 @@
+version: '3.1'
+
+services:
+
+  wordpress:
+    image: wordpress
+    restart: always
+    networks:
+      - external_network
+      - internal_network
+    #ports:
+    #  - 8080:80
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
+      WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+      WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
+    volumes:
+      - ./wordpress:/var/www/html
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=mastodon_external_network"
+      - "traefik.http.services.uckermark-social.loadbalancer.server.port=80"
+      - "traefik.http.routers.uckermark-social.rule=(Host(`uckermark.social`) || Host(`www.uckermark.social`))"
+      - "traefik.http.routers.uckermark-social.entrypoints=websecure"
+      - "traefik.http.routers.uckermark-social.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.uckermark-social.middlewares=blogauth"
+      - "traefik.http.middlewares.blogauth.basicauth.users=ananas:$$2y$$05$$noJRtU7JseMMmht7h3cgieWUA7KeNa3FWDhDYXK/cA/S1PKs5Cj3G"
+
+  db:
+    image: mysql:5.7
+    restart: always
+    networks:
+      - internal_network
+    environment:
+      MYSQL_DATABASE: ${WORDPRESS_DB_NAME}
+      MYSQL_USER: ${WORDPRESS_DB_USER}
+      MYSQL_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+      MYSQL_RANDOM_ROOT_PASSWORD: '1'
+    volumes:
+      - ./db:/var/lib/mysql
+networks:
+  external_network:
+    name: mastodon_external_network
+  internal_network:
+    internal: true
+# volumes:
+#   wordpress:
+#   db:
